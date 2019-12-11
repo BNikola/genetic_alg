@@ -88,8 +88,10 @@ def show(ft):
     ax.scatter(best_x, best_y, zorder=15, c='lightgreen', s=66)
     best = z1(best_x, best_y)
     ax.annotate(np.round(best, 3), (best_x + 0.1, best_y + 0.1), c='g')
+    ax.set_xlabel('X axis')
+    ax.set_ylabel('Y axis')
     plt.title("Broj ponavljanja: " + str(ft) + " best(x: " + str("{:5.4f}").format(best_x)  + ", " + str("{:5.4f}").format(best_y) + ")")
-    plt.pause(0.2)
+    plt.pause(0.1)
 
 
 
@@ -105,15 +107,15 @@ y = np.arange(-3.0, 3.0, 0.01)
 X,Y = np.meshgrid(x,y)
 Z = z1(X,Y)
 
-population_size = 30
+population_size = 50
 max_iter        = 1000
-max_same        = 60
-prob_co         = 0.85
-prob_mut        = 0.15
+max_same        = 30
+prob_co         = 0.9
+prob_mut        = 0.2
 Gd              = -3
 Gg              = 3
 elit            = 1
-prec            = 3
+prec            = 2
 
 n = np.int64(np.ceil(np.log((Gg-Gd) * 10 ** prec + 1) / np.log(2)))
 
@@ -166,7 +168,6 @@ cBest_y   = best_y
 cBest     = best
 
 # while loop
-# todo - make: done == 0
 while done == 0:
     tmp_v = population_value
     tmp_p_x = population_x
@@ -279,6 +280,7 @@ while done == 0:
     show(iter)
 
     print(str(bc) + "---" + str(best) + "---" + str(cBest))
+    print(iter)
     if cBest == best:
         bc += 1
     else:
