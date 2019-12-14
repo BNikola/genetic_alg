@@ -90,8 +90,8 @@ def show(ft):
     ax.annotate(np.round(best, 3), (best_x + 0.1, best_y + 0.1), c='g')
     ax.set_xlabel('X axis')
     ax.set_ylabel('Y axis')
-    plt.title("Broj ponavljanja: " + str(ft) + " best(x: " + str("{:5.4f}").format(best_x)  + ", " + str("{:5.4f}").format(best_y) + ")")
-    plt.pause(0.1)
+    plt.title("Broj ponavljanja: " + str(ft) + " best(" + str("{:5.4f}").format(best_x)  + ", " + str("{:5.4f}").format(best_y) + ", " + str("{:5.4f}").format(best) + ")")
+    plt.pause(0.05)
 
 
 
@@ -206,43 +206,60 @@ while done == 0:
         tr_x = 0
         tr_y = 0
         if r < prob_co:                                               # da li se vrsi rekombinacija u i-tom paru
-            for j in range(2):
-                da = 1
-                r_x  = np.random.uniform()
-                if r_x > 0.3 or r_x < 0.8:
-                    r_y = np.random.uniform()
-                else:
-                    r_y = r_x
-                tr_x = np.int64(np.floor(r_x * (n - 1)))  # tacka u kojoj se vrsi rekombinacija za x
-                tr_y = np.int64(np.floor(r_y * (n - 1)))  # tacka u kojoj se vrsi rekombinacija za y
-                temp = 2 ** n - 1                                         # najveci broj sa n bita
-                # Za x
-                m1_x = np.bitwise_and(temp * 2 ** (tr_x + 1), temp)             # prva maska
-                m2_x = np.bitwise_xor(m1_x, temp)                             # druga maska
+            da = 1
+            r_x  = np.random.uniform()
+            if r_x > 0.3 or r_x < 0.8:
+                r_y = np.random.uniform()
+            else:
+                r_y = r_x
 
-                # print(np.binary_repr(m1_x, width=n))
-                # print(np.binary_repr(m2_x, width=n))
+            df_rek = pd.DataFrame(columns=['Indeks', 'X', 'Y'])
+            tr_x = np.int64(np.floor(r_x * (n - 1)))  # tacka u kojoj se vrsi rekombinacija za x
+            tr_y = np.int64(np.floor(r_y * (n - 1)))  # tacka u kojoj se vrsi rekombinacija za y
+            temp = 2 ** n - 1                                         # najveci broj sa n bita
+            # Za x
+            m1_x = np.bitwise_and(temp * 2 ** (tr_x + 1), temp)             # prva maska
+            m2_x = np.bitwise_xor(m1_x, temp)                             # druga maska
 
-                next_gen_x_coded[2*i - 1] = np.bitwise_or(np.bitwise_and(population_x_coded[2*i - 1], m1_x), np.bitwise_and(population_x_coded[2 * i], m2_x))
-                next_gen_x_coded[2*i]     = np.bitwise_or(np.bitwise_and(population_x_coded[2*i - 1], m2_x), np.bitwise_and(population_x_coded[2 * i], m1_x))
+            # za Y
+            m1_y = np.bitwise_and(temp * 2 ** (tr_y + 1), temp)  # prva maska
+            m2_y = np.bitwise_xor(m1_y, temp)  # druga maska
 
-                next_gen_x[2*i - 1] = decode(next_gen_x_coded[2*i - 1], Gd, Gg, n)
-                next_gen_x[2*i]     = decode(next_gen_x_coded[2*i], Gd, Gg, n)
+            df_rek = df_rek.append({'Indeks': 'maska 1', 'X': np.binary_repr(m1_x, n), 'Y':np.binary_repr(m1_y, n)},
+                                   ignore_index=True)
+            df_rek = df_rek.append({'Indeks': 'maska 2', 'X': np.binary_repr(m2_x, n), 'Y':np.binary_repr(m2_y, n)},
+                                   ignore_index=True)
+            df_rek = df_rek.append({'Indeks': 'prije',
+                                    'X': [np.binary_repr(next_gen_x_coded[2 * i - 1],n),np.binary_repr(next_gen_x_coded[2 * i],n)],
+                                    'Y': [np.binary_repr(next_gen_y_coded[2 * i - 1],n),np.binary_repr(next_gen_y_coded[2 * i],n)]},
+                                   ignore_index=True)
 
-                # za Y
-                m1_y = np.bitwise_and(temp * 2 ** (tr_y + 1), temp)  # prva maska
-                m2_y = np.bitwise_xor(m1_y, temp)  # druga maska
+# todo - provjeriti permutaciju u matlabu
+            # tmp = next_gen_x_coded[2 * i -1]
+            next_gen_x_coded[2 * i - 1] = np.bitwise_or(np.bitwise_and(population_x_coded[2 * i - 1], m1_x),np.bitwise_and(population_x_coded[2 * i], m2_x))
+            # next_gen_x_coded[2 * i]     = np.bitwise_or(np.bitwise_and(tmp, m2_x), np.bitwise_and(population_x_coded[2 * i], m1_x))
+            next_gen_x_coded[2 * i]     = np.bitwise_or(np.bitwise_and(population_x_coded[2 * i - 1], m2_x), np.bitwise_and(population_x_coded[2 * i], m1_x))
 
-                # print(np.binary_repr(m1_y, width=n))
-                # print(np.binary_repr(m2_y, width=n))
+            next_gen_x[2*i - 1] = decode(next_gen_x_coded[2*i - 1], Gd, Gg, n)
+            next_gen_x[2*i]     = decode(next_gen_x_coded[2*i], Gd, Gg, n)
 
-                next_gen_y_coded[2 * i - 1] = np.bitwise_or(np.bitwise_and(population_y_coded[2 * i - 1], m1_y),
-                                                            np.bitwise_and(population_y_coded[2 * i], m2_y))
-                next_gen_y_coded[2 * i] = np.bitwise_or(np.bitwise_and(population_y_coded[2 * i - 1], m2_y),
-                                                        np.bitwise_and(population_y_coded[2 * i], m1_y))
+            # tmp = next_gen_y_coded[2 * i - 1]
+            next_gen_y_coded[2 * i - 1] = np.bitwise_or(np.bitwise_and(population_y_coded[2 * i - 1], m1_y), np.bitwise_and(population_y_coded[2 * i], m2_y))
+            # next_gen_y_coded[2 * i] = np.bitwise_or(np.bitwise_and(tmp, m2_y), np.bitwise_and(population_y_coded[2 * i], m1_y))
+            next_gen_y_coded[2 * i] = np.bitwise_or(np.bitwise_and(population_y_coded[2 * i - 1], m2_y), np.bitwise_and(population_y_coded[2 * i], m1_y))
 
-                next_gen_y[2 * i - 1] = decode(next_gen_y_coded[2 * i - 1], Gd, Gg, n)
-                next_gen_y[2 * i] = decode(next_gen_y_coded[2 * i], Gd, Gg, n)
+            df_rek = df_rek.append({'Indeks': 'poslije',
+                                    'X': [np.binary_repr(next_gen_x_coded[2 * i - 1], n),
+                                          np.binary_repr(next_gen_x_coded[2 * i], n)],
+                                    'Y': [np.binary_repr(next_gen_y_coded[2 * i - 1], n),
+                                          np.binary_repr(next_gen_y_coded[2 * i], n)]},
+                                   ignore_index=True)
+
+            if do_display == 1:
+                print(df_rek)
+
+            next_gen_y[2 * i - 1] = decode(next_gen_y_coded[2 * i - 1], Gd, Gg, n)
+            next_gen_y[2 * i] = decode(next_gen_y_coded[2 * i], Gd, Gg, n)
 
     population_x = next_gen_x
     population_x_coded = next_gen_x_coded
@@ -251,7 +268,6 @@ while done == 0:
     population_y_coded = next_gen_y_coded
 
     # mutacija
-    # todo ispis mutacije
     for i in range(2*elit, population_size):
         r_x = np.random.uniform()
         r_y = np.random.uniform()
@@ -259,7 +275,6 @@ while done == 0:
         tr = 0
         if r_x < prob_mut:
             da = 1
-            #todo - change random uniform to normal!
             tr = np.int64(np.floor(np.random.uniform() * n))
             next_gen_x_coded[i] = np.bitwise_xor(2**tr, population_x_coded[i])
             next_gen_x[i] = decode(next_gen_x_coded[i], Gd, Gg, n)
@@ -288,7 +303,8 @@ while done == 0:
         bc = 0
     if bc > max_same or iter > max_iter:
         done = 1
-
+fig.ginput()
+print("Ocjena populacije: " + str(np.sum(population_fitness)))
 # endregion
 
 # endregion
