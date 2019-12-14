@@ -101,7 +101,7 @@ def show(ft):
 
 # region Parameters
 do_display = 1
-minOrMax = 1
+minOrMax = 2
 x = np.arange(-3.0, 3.0, 0.01)
 y = np.arange(-3.0, 3.0, 0.01)
 X,Y = np.meshgrid(x,y)
