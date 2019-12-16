@@ -100,21 +100,21 @@ def show(ft):
 # endregion
 
 # region Parameters
-do_display = 1
-minOrMax = 2
+do_display = 0
+minOrMax = 1
 x = np.arange(-3.0, 3.0, 0.01)
 y = np.arange(-3.0, 3.0, 0.01)
 X,Y = np.meshgrid(x,y)
 Z = z1(X,Y)
 
-population_size = 50
-max_iter        = 1000
-max_same        = 30
-prob_co         = 0.9
-prob_mut        = 0.2
+population_size = 30
+max_iter        = 500
+max_same        = 20
+prob_co         = 0.95
+prob_mut        = 0.05
 Gd              = -3
 Gg              = 3
-elit            = 1
+elit            = 0
 prec            = 2
 
 n = np.int64(np.ceil(np.log((Gg-Gd) * 10 ** prec + 1) / np.log(2)))
@@ -199,14 +199,11 @@ while done == 0:
     population_y_coded = next_gen_y_coded
 
     #rekombinacija
-    # todo - ispis rekombinacije
     for i in range(elit, np.int64(np.floor(population_size/2))):
         r = np.random.uniform()
-        da = 0
         tr_x = 0
         tr_y = 0
         if r < prob_co:                                               # da li se vrsi rekombinacija u i-tom paru
-            da = 1
             r_x  = np.random.uniform()
             if r_x > 0.3 or r_x < 0.8:
                 r_y = np.random.uniform()
@@ -234,19 +231,16 @@ while done == 0:
                                     'Y': [np.binary_repr(next_gen_y_coded[2 * i - 1],n),np.binary_repr(next_gen_y_coded[2 * i],n)]},
                                    ignore_index=True)
 
-# todo - provjeriti permutaciju u matlabu
-            # tmp = next_gen_x_coded[2 * i -1]
+            tmp = next_gen_x_coded[2 * i - 1]
             next_gen_x_coded[2 * i - 1] = np.bitwise_or(np.bitwise_and(population_x_coded[2 * i - 1], m1_x),np.bitwise_and(population_x_coded[2 * i], m2_x))
-            # next_gen_x_coded[2 * i]     = np.bitwise_or(np.bitwise_and(tmp, m2_x), np.bitwise_and(population_x_coded[2 * i], m1_x))
-            next_gen_x_coded[2 * i]     = np.bitwise_or(np.bitwise_and(population_x_coded[2 * i - 1], m2_x), np.bitwise_and(population_x_coded[2 * i], m1_x))
+            next_gen_x_coded[2 * i]     = np.bitwise_or(np.bitwise_and(tmp, m2_x), np.bitwise_and(population_x_coded[2 * i], m1_x))
 
             next_gen_x[2*i - 1] = decode(next_gen_x_coded[2*i - 1], Gd, Gg, n)
             next_gen_x[2*i]     = decode(next_gen_x_coded[2*i], Gd, Gg, n)
 
-            # tmp = next_gen_y_coded[2 * i - 1]
+            tmp = next_gen_y_coded[2 * i - 1]
             next_gen_y_coded[2 * i - 1] = np.bitwise_or(np.bitwise_and(population_y_coded[2 * i - 1], m1_y), np.bitwise_and(population_y_coded[2 * i], m2_y))
-            # next_gen_y_coded[2 * i] = np.bitwise_or(np.bitwise_and(tmp, m2_y), np.bitwise_and(population_y_coded[2 * i], m1_y))
-            next_gen_y_coded[2 * i] = np.bitwise_or(np.bitwise_and(population_y_coded[2 * i - 1], m2_y), np.bitwise_and(population_y_coded[2 * i], m1_y))
+            next_gen_y_coded[2 * i] = np.bitwise_or(np.bitwise_and(tmp, m2_y), np.bitwise_and(population_y_coded[2 * i], m1_y))
 
             df_rek = df_rek.append({'Indeks': 'poslije',
                                     'X': [np.binary_repr(next_gen_x_coded[2 * i - 1], n),
@@ -271,15 +265,11 @@ while done == 0:
     for i in range(2*elit, population_size):
         r_x = np.random.uniform()
         r_y = np.random.uniform()
-        da = 0
         tr = 0
         if r_x < prob_mut:
-            da = 1
             tr = np.int64(np.floor(np.random.uniform() * n))
             next_gen_x_coded[i] = np.bitwise_xor(2**tr, population_x_coded[i])
             next_gen_x[i] = decode(next_gen_x_coded[i], Gd, Gg, n)
-        # if r_x < prob_mut:
-        #     da = 1
             if tr < 0.3 or tr > 0.8:
                 tr = np.int64(np.floor((np.random.uniform()) * n))
             next_gen_y_coded[i] = np.bitwise_xor(2**tr, population_y_coded[i])
