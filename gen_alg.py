@@ -107,14 +107,14 @@ y = np.arange(-3.0, 3.0, 0.01)
 X,Y = np.meshgrid(x,y)
 Z = z1(X,Y)
 
-population_size = 30
+population_size = 60
 max_iter        = 500
 max_same        = 20
 prob_co         = 0.95
-prob_mut        = 0.05
+prob_mut        = 0.2
 Gd              = -3
 Gg              = 3
-elit            = 0
+elit            = 1
 prec            = 2
 
 n = np.int64(np.ceil(np.log((Gg-Gd) * 10 ** prec + 1) / np.log(2)))
